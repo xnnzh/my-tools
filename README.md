@@ -82,6 +82,21 @@ my-tools db batch-delete configs/clean_hsdi.jsonc --env .env --task clean_hsdi_i
 - `.env.example` 可复制
 - 日志 `app-{PID}.log` 已忽略
 
+## 命令补全
+
+补全脚本安装后，Click 会自动补全子命令、option 名称和部分动态参数。
+
+当前动态补全包括：
+
+- `my-tools git delete-branch <TAB>`：补全本地 Git 分支
+
+示例：
+
+```shell
+my-tools completion install --shell zsh
+my-tools git delete-branch fe<TAB>
+```
+
 ## my-ssh
 
 my-ssh 暂未提供 Python 版；历史 Shell 实现在 `legacy-shell/net/my-ssh.sh`。

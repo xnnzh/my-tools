@@ -5,6 +5,7 @@ from urllib.parse import quote
 
 import click
 
+from ..core.completion import complete_git_branches
 from ..core.console import confirm, error, notice, warn
 from ..core.git_utils import branch_exists_remote, current_branch, remote_branch, remote_url
 from ..core.platform import open_url
@@ -29,7 +30,7 @@ def new_branch(branch_name):
 
 
 @git.command("delete-branch")
-@click.argument("branches", nargs=-1, required=True)
+@click.argument("branches", nargs=-1, required=True, shell_complete=complete_git_branches)
 def delete_branch(branches):
     """删除指定的本地分支和对应的远程分支。"""
     run(["git", "fetch"], check=False)
