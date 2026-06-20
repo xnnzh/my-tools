@@ -1,5 +1,6 @@
 import click
 
+from .completion.commands import completion
 from .core.installer import install, list_tools, uninstall, update
 from .db.commands import db
 from .file.commands import file_group
@@ -12,6 +13,7 @@ def cli():
     """my-tools: 个人命令行工具集。"""
 
 
+cli.add_command(completion)
 cli.add_command(db)
 cli.add_command(git)
 cli.add_command(file_group, name="file")

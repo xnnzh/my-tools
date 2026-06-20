@@ -59,6 +59,9 @@ my-tools file zip
 my-tools maven simple
 
 my-tools db batch-delete
+
+my-tools completion show --shell zsh
+my-tools completion install --shell zsh
 ```
 
 ## DB 工具
