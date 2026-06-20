@@ -1,9 +1,9 @@
-#!/bin/bash
-# version: v1.7.1
-# author: zxbetter
+#!/usr/bin/env bash
+
+# author: xnnzh
 # license: MIT
 # contact: zhangxinbetter@gmail.com
-# site: https://zxbetter.github.io
+# website: https://github.com/xnnzh
 # time: 2020-08-19 21:30:00
 # ----------------------------------------------------------------------------------------------------------------------
 # 通用模块，提供通用的功能
@@ -182,7 +182,7 @@ git_remote_branch() {
 git_check_branch_in_remote() {
   if [ "X${*}" = "X" ]; then
     git_check_branch_in_remote "$(git_current_branch)"
-  elif git ls-remote --exit-code --heads origin "${*}" > /dev/null 2>&1; then
+  elif git ls-remote --exit-code --heads origin "${*}" >/dev/null 2>&1; then
     true
   else
     false

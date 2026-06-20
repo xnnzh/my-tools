@@ -1,9 +1,9 @@
-#!/bin/bash
-# version: v2.0.1
-# author: zxbetter
+#!/usr/bin/env bash
+
+# author: xnnzh
 # license: MIT
 # contact: zhangxinbetter@gmail.com
-# site: https://zxbetter.github.io
+# website: https://github.com/xnnzh
 # time: 2020-08-19 21:06:00
 # alias: git-delete-branch
 # ----------------------------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ SCRIPTPATH=$(
 export APP_HOME="${SCRIPTPATH%/my-tools/*}/my-tools"
 # 引入git通用模块
 # shellcheck source=/dev/null
-. "${APP_HOME}/utils/common"
+. "${APP_HOME}/utils/common.sh"
 
 # 定义函数
 # 帮助函数
@@ -60,6 +60,8 @@ if [ "X${*}" = "X" ]; then
 fi
 
 # 执行逻辑
+
+git fetch
 
 idxl=0
 idxr=0

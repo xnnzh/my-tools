@@ -1,9 +1,9 @@
-#!/bin/bash
-# version: v1.1.4
-# author: zxbetter
+#!/usr/bin/env bash
+
+# author: xnnzh
 # license: MIT
 # contact: zhangxinbetter@gmail.com
-# site: https://zxbetter.github.io
+# website: https://github.com/xnnzh
 # time: 2020-08-22 16:07:00
 # alias: file-new-with-template
 # ----------------------------------------------------------------------------------------------------------------------
@@ -21,11 +21,11 @@ SCRIPTPATH=$(
 export APP_HOME="${SCRIPTPATH%/my-tools/*}/my-tools"
 # 引入通用模块
 # shellcheck source=/dev/null
-. "${APP_HOME}"/utils/common
+. "${APP_HOME}"/utils/common.sh
 
 # 定义变量
 # 模板文件，有默认值
-TEMPLATE_FILE_PATH="${APP_HOME}/user-data/file-template"
+TEMPLATE_FILE_PATH="${APP_HOME}/.run/file-template"
 # 生成的目标文件
 TARGET_FILE_PATH=""
 # 是否强制覆盖已存在的文件

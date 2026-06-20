@@ -1,9 +1,9 @@
-#!/bin/bash
-# version: v4.3.1
-# author: zxbetter
+#!/usr/bin/env bash
+
+# author: xnnzh
 # license: MIT
 # contact: zhangxinbetter@gmail.com
-# site: https://zxbetter.github.io
+# website: https://github.com/xnnzh
 # time: 2020-08-21 16:00:00
 # alias: git-auto
 # ----------------------------------------------------------------------------------------------------------------------
@@ -13,15 +13,15 @@
 set -e
 
 SCRIPTPATH=$(
-    cd "$(dirname "$0")"
-    pwd
+  cd "$(dirname "$0")"
+  pwd
 )
 
 # 根路径
 export APP_HOME="${SCRIPTPATH%/my-tools/*}/my-tools"
 # 引入git通用模块
 # shellcheck source=/dev/null
-. "${APP_HOME}/utils/common"
+. "${APP_HOME}/utils/common.sh"
 
 # 定义变量
 # commit信息
@@ -33,7 +33,7 @@ LOOP_INDEX=0
 # 定义函数
 # 帮助函数
 helpu() {
-    cat <<EOF
+  cat <<EOF
 
 usage: $0 [option]
 
@@ -44,25 +44,26 @@ OPTIONS:
   [--help | -h]                  帮助
 EOF
 
-    exit
+  exit
 }
 
 # 解析参数
 while true; do
-    if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-        helpu
-    elif [ "$1" = "-m" ]; then
-        COMMIT_MSG[$((LOOP_INDEX++))]="${1}"
-        COMMIT_MSG[$((LOOP_INDEX++))]="${2}"
-        shift 2
-    else
-        break
-    fi
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    helpu
+  elif [ "$1" = "-m" ]; then
+    COMMIT_MSG[$((LOOP_INDEX++))]="${1}"
+    COMMIT_MSG[$((LOOP_INDEX++))]="${2}"
+    shift 2
+  else
+    break
+  fi
 done
 
 # 执行逻辑
 
 echo ""
+notice_msg "Time: $(date '+%Y-%m-%d %H:%M:%S')"
 notice_msg "User: $(git config user.name)"
 notice_msg "Email: $(git config user.email)"
 notice_msg "Remote: $(git remote get-url origin)"
@@ -83,65 +84,66 @@ echo_orange "git status"
 git status
 
 change_count=$(git status --porcelain | awk 'END{print NR}')
+stash_count=$(git stash list | wc -l)
 change_stash=""
 
 if [ "${change_count}" != "0" ]; then
-    # Add changes to git
-    if [ "$(confirm_go_on_v2 "git add .")" = "Y" ]; then
-        git add .
-        # Commit changes
-        if [ "$(confirm_go_on_v2 "git commit")" = "Y" ]; then
-            if [ ${#COMMIT_MSG[@]} -eq 0 ]; then
-                COMMIT_MSG[$((LOOP_INDEX++))]="-m"
-                while true; do
-                    read -p "请输入提交信息(不输入将使用默认提交信息): " msg
-                    if [ "X${msg}" = "X" ]; then
-                        COMMIT_MSG[$((LOOP_INDEX++))]="${DEFAULT_COMMIT_MSG}"
-                        break
-                    else
-                        COMMIT_MSG[$((LOOP_INDEX++))]="${msg}"
-                        break
-                    fi
-                done
-            fi
-            git commit "${COMMIT_MSG[@]}"
-        else
-            notice_msg "Completed!"
-            exit
-        fi
+  # Add changes to git
+  if [ "$(confirm_go_on_v2 "git add .")" = "Y" ]; then
+    git add .
+    # Commit changes
+    if [ "$(confirm_go_on_v2 "git commit")" = "Y" ]; then
+      if [ ${#COMMIT_MSG[@]} -eq 0 ]; then
+        COMMIT_MSG[$((LOOP_INDEX++))]="-m"
+        while true; do
+          read -p "请输入提交信息(不输入将使用默认提交信息): " msg
+          if [ "X${msg}" = "X" ]; then
+            COMMIT_MSG[$((LOOP_INDEX++))]="${DEFAULT_COMMIT_MSG}"
+            break
+          else
+            COMMIT_MSG[$((LOOP_INDEX++))]="${msg}"
+            break
+          fi
+        done
+      fi
+      git commit "${COMMIT_MSG[@]}"
     else
-        change_stash="stash"
+      notice_msg "Completed!"
+      exit
     fi
+  else
+    change_stash="stash"
+  fi
 fi
 
 # 没有对应的远程分支
 if [ "X${REMOTE_BRANCH}" = "X" ]; then
-    notice_msg "Completed!"
-    exit
+  notice_msg "Completed!"
+  exit
 fi
 
 # git stash
 if [ "X${change_stash}" = "Xstash" ]; then
-    git stash
+  git stash
 fi
 
 # 落后远程分支的提交数
 behind_count=$(git rev-list --count HEAD..@{u})
 if [ "${behind_count}" != "0" ]; then
-    echo_orange "git pull --rebase"
-    git pull --rebase
+  echo_orange "git pull --rebase"
+  git pull --rebase
 fi
 
 # 领先远程分支的提交数
 ahead_count=$(git rev-list --count @{u}..HEAD)
 if [ "${ahead_count}" != "0" ]; then
-    echo_orange "git push"
-    git push
+  echo_orange "git push"
+  git push
 fi
 
 # git unstash
-if [ "X${change_stash}" = "Xstash" ]; then
-    git stash pop
+if [ "X${change_stash}" = "Xstash" ] && [ "${stash_count}" != "$(git stash list | wc -l)" ]; then
+  git stash pop
 fi
 
 notice_msg "Completed!"

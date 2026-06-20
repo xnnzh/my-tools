@@ -1,9 +1,9 @@
-#!/bin/bash
-# version: v1.2.0
-# author: zxbetter
+#!/usr/bin/env bash
+
+# author: xnnzh
 # license: MIT
 # contact: zhangxinbetter@gmail.com
-# site: https://zxbetter.github.io
+# website: https://github.com/xnnzh
 # time: 2020-08-19 21:06:00
 # alias: git-new-branch
 # ----------------------------------------------------------------------------------------------------------------------
@@ -16,15 +16,15 @@
 set -eo pipefail
 
 SCRIPTPATH=$(
-    cd "$(dirname "$0")"
-    pwd
+  cd "$(dirname "$0")"
+  pwd
 )
 
 # 根路径
 export APP_HOME="${SCRIPTPATH%/my-tools/*}/my-tools"
 # 引入git通用模块
 # shellcheck source=/dev/null
-. "${APP_HOME}/utils/common"
+. "${APP_HOME}/utils/common.sh"
 
 # 定义变量
 TRACK_BRANCH=$(git_current_branch)
@@ -33,7 +33,7 @@ NEW_BRANCH=""
 # 定义函数
 # 帮助函数
 helpu() {
-    cat <<EOF
+  cat <<EOF
 
 usage: $0 <option>
 
@@ -44,23 +44,23 @@ OPTIONS:
   [--help | -h]            帮助
 EOF
 
-    exit
+  exit
 }
 
 # 解析参数
 while true; do
-    if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
-        helpu
-    elif [ "$1" = "-b" ]; then
-        NEW_BRANCH="${2}"
-        shift 2
-    else
-        break
-    fi
+  if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    helpu
+  elif [ "$1" = "-b" ]; then
+    NEW_BRANCH="${2}"
+    shift 2
+  else
+    break
+  fi
 done
 
 if [ "X${NEW_BRANCH}" = "X" ]; then
-    helpu
+  helpu
 fi
 
 # 执行逻辑

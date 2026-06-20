@@ -2,6 +2,24 @@ tmp/
 dist/
 user-data/
 .DS_store
+.DS_Store
 .run/
 .idea/
 .fleet/
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+.venv/
+build/
+wheels/
+*.egg-info/
+.ruff_cache/
+.pytest_cache/
+
+# Runtime logs and local secrets
+*.log
+.env
+
+# AI
+CLAUDE.md

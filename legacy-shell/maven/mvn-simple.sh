@@ -1,9 +1,9 @@
-#!/bin/bash
-# version: v1.1.4
-# author: zxbetter
+#!/usr/bin/env bash
+
+# author: xnnzh
 # license: MIT
 # contact: zhangxinbetter@gmail.com
-# site: https://zxbetter.github.io
+# website: https://github.com/xnnzh
 # time: 2020-08-22 16:51:12
 # alias: mvn-simple
 # ----------------------------------------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ SCRIPTPATH=$(
 export APP_HOME="${SCRIPTPATH%/my-tools/*}/my-tools"
 # 引入通用模块
 # shellcheck source=/dev/null
-. "${APP_HOME}/utils/common"
+. "${APP_HOME}/utils/common.sh"
 
 # 定义函数
 # 帮助函数

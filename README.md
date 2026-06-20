@@ -1,82 +1,79 @@
-## My-Tools
+# My-Tools
 
-个人工具集：方便使用，提高效率。
+个人命令行工具集，基于 Python + uv，统一入口为 `my-tools`。
 
-整理了自己编写的或者收集的小工具。
+`legacy-shell/` 中保留历史 Shell 实现，仅作为参考。
 
-## 安装和使用
-
-> 1. Mac自带的命令行工具是基于BSD的，可能和Linux的命令行表现不一致，可以安装GNU的命令行工具代替Mac自带的命令行工具。
+## 安装
 
 ```shell
-brew install coreutils
-brew install gnu-sed
-
-# 配置环境变量
-PATH=/usr/local/opt/coreutils/libexec/gnubin:/usr/local/opt/gnu-sed/libexec/gnubin:/usr/local/bin:$PATH
-MANPATH=/usr/local/opt/coreutils/libexec/gnuman:/usr/local/opt/gnu-sed/libexec/gnuman:$MANPATH
-```
-
-> 2. Windows请使用GitBash安装。
-
-### 安装
-
-```shell
-git clone https://github.com/zxbetter/my-tools
+git clone https://github.com/xnnzh/my-tools
 
 cd my-tools
 
-chmod a+x my-tools
-
-./my-tools --install
+uv sync
+uv run my-tools install
 ```
 
-## 工具列表
-
-### Git
-
-| 命令名称              | 描述                                          |
-| :------------------- | :--------------------------------------------- |
-| git-new-branch       | 基于当前分支创建新分支，并与对应的远程分支绑定 |
-| git-auto             | 提交当前分支的变更，并推送到远程               |
-| git-delete-branch    | 删除指定的本地分支和对应的远程分支             |
-| gitlab-merge-request | 提交Gitlab合并请求                             |
-
-### File
-
-| 命令名称                 | 描述            |
-| :--------------------- | :-------------- |
-| file-new-with-template | 根据模板生成新文件 |
-
-### Maven
-
-| 命令名称       | 描述                                     |
-|:-----------| :-------------------------------------- |
-| mvn-simple | 执行Maven命令时，跳过单元测试和Java文档      |
-
-### Net
-
-| 命令名称   | 描述                      |
-|:-------|:------------------------|
-| my-ssh | ssh工具，支持跳板机以及登录后执行简单的命令 |
-
-## 自定义工具
-
-My-Tools不仅使用起来很方便，同时也可以很方便地修改或者增加自定义的工具。
-
-### 修改工具
-
-如果现有的工具不能满足你的使用场景，可以对其进行修改，然后执行 `./my-tools -i` 重新安装即可。
-
-### 增加工具
-
-在根目录或者子目录下创建shell脚本文件，编写完脚本后执行 `./my-tools -i` 重新安装即可。
-
-> TIP: shell脚本文件中需要在注释中指定命令的别名才能正常安装，格式如下
+安装后：
 
 ```shell
-# alias: xxx
-````
+my-tools --help
+```
+
+## 开发运行
+
+```shell
+uv run my-tools --help
+uv run my-tools list
+uv run ruff check .
+uv run pytest
+```
+
+## 命令列表
+
+```shell
+my-tools install
+my-tools uninstall
+my-tools update
+my-tools list
+
+my-tools git auto
+my-tools git new-branch
+my-tools git delete-branch
+my-tools git open-remote
+my-tools git gitlab-merge-request
+my-tools git copy-change
+
+my-tools file new-with-template
+my-tools file zip
+
+my-tools maven simple
+
+my-tools db batch-delete
+```
+
+## DB 工具
+
+`my-tools db batch-delete` 按配置的条件批量删除 MySQL 表数据，支持 keyset 分页、级联收集、事务内分 chunk 删除。
+
+```shell
+# 列出配置文件中的所有任务
+my-tools db batch-delete configs/clean_hsdi.jsonc --list
+
+DB_USER=root DB_PASS=xxx \
+  my-tools db batch-delete configs/clean_hsdi.jsonc --task clean_hsdi_interface --dry-run
+
+my-tools db batch-delete configs/clean_hsdi.jsonc --env .env --task clean_hsdi_interface
+```
+
+- `.env` 不提交
+- `.env.example` 可复制
+- 日志 `app-{PID}.log` 已忽略
+
+## my-ssh
+
+my-ssh 暂未提供 Python 版；历史 Shell 实现在 `legacy-shell/net/my-ssh.sh`。
 
 ## License
 
