@@ -19,9 +19,10 @@ cli.add_command(maven)
 
 
 @cli.command("install")
-def install_cmd():
+@click.option("--force-reinstall", is_flag=True, help="强制重新构建并重装全局 my-tools")
+def install_cmd(force_reinstall):
     """安装 my-tools。"""
-    install()
+    install(force_reinstall=force_reinstall)
 
 
 @cli.command("uninstall")
@@ -31,9 +32,10 @@ def uninstall_cmd():
 
 
 @cli.command("update")
-def update_cmd():
+@click.option("--force-reinstall", is_flag=True, help="更新后强制重新构建并重装全局 my-tools")
+def update_cmd(force_reinstall):
     """更新 my-tools。"""
-    update()
+    update(force_reinstall=force_reinstall)
 
 
 @cli.command("list")

@@ -58,11 +58,18 @@ def cleanup_legacy_shell_rc():
             notice(f"已清理 {rc} 中的旧 marker")
 
 
-def install():
+def _install_tool(root: str, *, force_reinstall: bool = False):
+    if force_reinstall:
+        run(["uv", "tool", "upgrade", "my-tools", "--reinstall", "--directory", root], cwd=root)
+    else:
+        run(["uv", "tool", "install", ".", "--force"], cwd=root)
+
+
+def install(force_reinstall: bool = False):
     root = _find_project_root()
     notice("准备安装 my-tools")
     run(["uv", "sync"], cwd=root)
-    run(["uv", "tool", "install", ".", "--force"], cwd=root)
+    _install_tool(root, force_reinstall=force_reinstall)
     notice("安装完成，可以使用: my-tools --help")
 
 
@@ -73,13 +80,13 @@ def uninstall():
     notice("卸载完成")
 
 
-def update():
+def update(force_reinstall: bool = False):
     root = _find_project_root()
     notice("准备更新 my-tools")
     ensure_clean_or_warn()
     run(["git", "pull", "--ff-only"], cwd=root)
     run(["uv", "sync"], cwd=root)
-    run(["uv", "tool", "install", ".", "--force"], cwd=root)
+    _install_tool(root, force_reinstall=force_reinstall)
     notice("更新完成")
 
 

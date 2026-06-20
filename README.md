@@ -15,6 +15,12 @@ uv sync
 uv run my-tools install
 ```
 
+当 `uv tool install . --force` 因缓存未拾取最新源码修复时，使用强制重装：
+
+```shell
+uv run my-tools install --force-reinstall
+```
+
 安装后：
 
 ```shell
@@ -34,8 +40,10 @@ uv run pytest
 
 ```shell
 my-tools install
+my-tools install --force-reinstall
 my-tools uninstall
 my-tools update
+my-tools update --force-reinstall
 my-tools list
 
 my-tools git auto
