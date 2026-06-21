@@ -70,6 +70,18 @@ my-tools db insert-sql-to-csv
 my-tools time to-timestamp
 my-tools time from-timestamp
 
+my-tools text unicode-encode
+my-tools text unicode-decode
+my-tools text utf8-encode
+my-tools text utf8-decode
+my-tools text url-encode
+my-tools text url-decode
+my-tools text base-encode
+my-tools text base-decode
+my-tools text case
+my-tools text upper
+my-tools text lower
+
 my-tools completion show --shell zsh
 my-tools completion install --shell zsh
 ```
@@ -217,6 +229,42 @@ my-tools file json-unescape escaped.txt -o raw.txt
 ```
 
 默认保留中文；如需转义为 `\uXXXX`，使用 `--ascii`。
+
+## Text 文本工具
+
+### 编码 / 解码
+
+```shell
+my-tools text unicode-encode "你好"
+my-tools text unicode-decode '\u4f60\u597d'
+
+my-tools text utf8-encode "你好"
+my-tools text utf8-decode "e4 bd a0 e5 a5 bd"
+
+my-tools text url-encode "你好 world?a=1&b=2"
+my-tools text url-decode "%E4%BD%A0%E5%A5%BD%20world%3Fa%3D1%26b%3D2"
+
+my-tools text base-encode "你好"
+my-tools text base-decode "5L2g5aW9"
+my-tools text base-encode "hello" --base 32
+```
+
+### 命名风格转换
+
+```shell
+my-tools text case "user_name" --to pascal
+my-tools text case "UserName" --to camel
+my-tools text case "userName" --to snake
+my-tools text case "user_name" --to kebab
+my-tools text upper "hello"
+my-tools text lower "HELLO"
+```
+
+如需从文件读取，使用 `--file`：
+
+```shell
+my-tools text url-encode input.txt --file -o output.txt
+```
 
 ## 时间工具
 

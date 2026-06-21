@@ -118,4 +118,16 @@ my-tools db mybatis-sql
 my-tools db insert-sql-to-csv
 
 my-tools time to-timestamp
-my-tools time from-timestamp""")
+my-tools time from-timestamp
+
+my-tools text unicode-encode
+my-tools text unicode-decode
+my-tools text utf8-encode
+my-tools text utf8-decode
+my-tools text url-encode
+my-tools text url-decode
+my-tools text base-encode
+my-tools text base-decode
+my-tools text case
+my-tools text upper
+my-tools text lower""")

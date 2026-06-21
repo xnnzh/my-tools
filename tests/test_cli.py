@@ -11,6 +11,7 @@ def test_cli_help():
     assert "maven" in result.output
     assert "db" in result.output
     assert "time" in result.output
+    assert "text" in result.output
 
 
 def test_list():
@@ -25,3 +26,7 @@ def test_list():
     assert "my-tools file json-unescape" in result.output
     assert "my-tools time to-timestamp" in result.output
     assert "my-tools time from-timestamp" in result.output
+    assert "my-tools text unicode-encode" in result.output
+    assert "my-tools text case" in result.output
+    assert "my-tools text upper" in result.output
+    assert "my-tools text lower" in result.output

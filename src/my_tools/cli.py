@@ -6,6 +6,7 @@ from .db.commands import db
 from .file.commands import file_group
 from .git.commands import git
 from .maven.commands import maven
+from .text.commands import text_group
 from .time_tools.commands import time_group
 
 
@@ -19,6 +20,7 @@ cli.add_command(db)
 cli.add_command(git)
 cli.add_command(file_group, name="file")
 cli.add_command(maven)
+cli.add_command(text_group)
 cli.add_command(time_group)
 
 
