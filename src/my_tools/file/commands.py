@@ -8,6 +8,7 @@ import click
 
 from ..core.console import confirm, error, notice, warn
 from .csv_render import DEFAULT_TEMPLATE, convert_csv
+from .excel_csv import list_sheet_names, write_excel_sheet_to_csv
 from .json_tools import (
     compact_json,
     escape_json_text,
@@ -139,6 +140,66 @@ def csv_render(csv_file, output, encoding, template, strict):
         Path(output).write_text(content, encoding=encoding)
     else:
         click.echo(content, nl=False)
+
+
+@file_group.command("excel-to-csv")
+@click.argument("excel_file", type=click.Path(exists=True, dir_okay=False))
+@click.option("-o", "--output", type=click.Path(dir_okay=False), help="CSV 输出文件路径")
+@click.option("--encoding", default="utf-8", show_default=True, help="CSV 输出文件编码")
+@click.option("--delimiter", default=",", show_default=True, help="CSV 分隔符")
+@click.option("--sheet", help="工作表名称")
+@click.option("--sheet-index", type=int, help="工作表序号，1-based")
+@click.option("--list-sheets", is_flag=True, help="列出工作表名称后退出")
+@click.option("--empty", default="", show_default=True, help="空单元格输出值")
+@click.option("--date-format", default="iso", show_default=True, help="日期/时间格式，iso 或 strftime 格式")
+@click.option("--formula", is_flag=True, help="输出公式文本而不是公式缓存值")
+@click.option("--trim-trailing-empty", is_flag=True, help="裁剪每行尾部空单元格")
+def excel_to_csv(
+    excel_file,
+    output,
+    encoding,
+    delimiter,
+    sheet,
+    sheet_index,
+    list_sheets,
+    empty,
+    date_format,
+    formula,
+    trim_trailing_empty,
+):
+    """将 Excel 工作表转换为 CSV。"""
+    if list_sheets:
+        names = list_sheet_names(excel_file)
+        for name in names:
+            click.echo(name)
+        return
+
+    try:
+        if output:
+            with open(output, "w", encoding=encoding, newline="") as f:
+                write_excel_sheet_to_csv(
+                    excel_file, f,
+                    sheet=sheet,
+                    sheet_index=sheet_index,
+                    delimiter=delimiter,
+                    empty=empty,
+                    date_format=date_format,
+                    data_only=not formula,
+                    trim_trailing_empty_flag=trim_trailing_empty,
+                )
+        else:
+            write_excel_sheet_to_csv(
+                excel_file, sys.stdout,
+                sheet=sheet,
+                sheet_index=sheet_index,
+                delimiter=delimiter,
+                empty=empty,
+                date_format=date_format,
+                data_only=not formula,
+                trim_trailing_empty_flag=trim_trailing_empty,
+            )
+    except ValueError as e:
+        raise click.ClickException(str(e))
 
 
 def _read_text(input_file: str | None, encoding: str) -> str:

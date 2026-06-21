@@ -15,6 +15,7 @@ def test_file_help():
     assert "json-compact" in result.output
     assert "json-escape" in result.output
     assert "json-unescape" in result.output
+    assert "excel-to-csv" in result.output
 
 
 def test_file_new_with_template(tmp_path: Path):

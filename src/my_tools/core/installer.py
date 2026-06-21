@@ -106,6 +106,7 @@ my-tools git copy-change
 my-tools file new-with-template
 my-tools file zip
 my-tools file csv-render
+my-tools file excel-to-csv
 my-tools file json-pretty
 my-tools file json-compact
 my-tools file json-escape

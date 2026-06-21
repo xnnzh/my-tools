@@ -56,6 +56,7 @@ my-tools git copy-change
 my-tools file new-with-template
 my-tools file zip
 my-tools file csv-render
+my-tools file excel-to-csv
 my-tools file json-pretty
 my-tools file json-compact
 my-tools file json-escape
@@ -246,6 +247,47 @@ my-tools file csv-render aliyun.csv \
 my-tools file csv-render aliyun.csv \
   --format "{@timestamp} [{__tag__:_pod_name_}] {level} {message}"
 ```
+
+### Excel 转 CSV
+
+`my-tools file excel-to-csv` 将 Excel 工作表转换为 CSV，基于 `openpyxl read_only` 模式，适合较大文件。
+
+**注意**：支持 `.xlsx` / `.xlsm`，不支持旧版 `.xls`。
+
+```shell
+# 输出到 stdout
+my-tools file excel-to-csv data.xlsx
+
+# 输出到文件
+my-tools file excel-to-csv data.xlsx -o data.csv
+
+# 选择 sheet
+my-tools file excel-to-csv data.xlsx --sheet Sheet1
+my-tools file excel-to-csv data.xlsx --sheet-index 2
+
+# 列出 sheet
+my-tools file excel-to-csv data.xlsx --list-sheets
+
+# 输出 TSV
+my-tools file excel-to-csv data.xlsx --delimiter $'\t' -o data.tsv
+
+# 空单元格输出 NULL
+my-tools file excel-to-csv data.xlsx --empty NULL
+
+# 自定义日期格式
+my-tools file excel-to-csv data.xlsx --date-format "%Y-%m-%d"
+
+# 输出公式文本（而不是公式缓存值）
+my-tools file excel-to-csv data.xlsx --formula
+
+# 管道组合：Excel → CSV → INSERT SQL
+my-tools file excel-to-csv data.xlsx | my-tools db csv-to-insert-sql --table user
+```
+
+- 默认 stdout，方便管道组合；
+- `-o` 输出文件，支持 `--encoding` 指定编码；
+- 默认输出公式缓存值，`--formula` 输出公式文本（openpyxl 不计算公式）；
+- `--trim-trailing-empty` 裁剪每行尾部空单元格。
 
 ## JSON 处理
 
