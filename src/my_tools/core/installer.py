@@ -108,4 +108,5 @@ my-tools file zip
 
 my-tools maven simple
 
-my-tools db batch-delete""")
+my-tools db batch-delete
+my-tools db mybatis-sql""")

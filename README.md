@@ -59,6 +59,7 @@ my-tools file zip
 my-tools maven simple
 
 my-tools db batch-delete
+my-tools db mybatis-sql
 
 my-tools completion show --shell zsh
 my-tools completion install --shell zsh
@@ -81,6 +82,33 @@ my-tools db batch-delete configs/clean_hsdi.jsonc --env .env --task clean_hsdi_i
 - `.env` 不提交
 - `.env.example` 可复制
 - 日志 `app-{PID}.log` 已忽略
+
+### MyBatis 日志转 SQL
+
+`my-tools db mybatis-sql` 将 MyBatis 日志中的 `Preparing` / `Parameters` 行转换为可执行的 SQL，支持从 stdin 或文件输入：
+
+```shell
+# 从 stdin 管道
+cat app.log | my-tools db mybatis-sql
+
+# 从文件
+my-tools db mybatis-sql app.log
+
+# 追加模式，保留原日志
+my-tools db mybatis-sql app.log --mode append
+
+# 仅输出 SQL
+my-tools db mybatis-sql app.log --mode sql-only
+
+# 禁用分号
+my-tools db mybatis-sql app.log --no-semicolon
+
+# 严格模式（参数不匹配返回错误）
+my-tools db mybatis-sql app.log --strict
+
+# 重定向输出
+my-tools db mybatis-sql app.log > output.sql
+```
 
 ## 命令补全
 
