@@ -414,6 +414,83 @@ def test_cli_mybatis_sql_strict_fails():
     assert result.exit_code != 0
 
 
+def test_format_replace_with_total():
+    log = (
+        "before\n"
+        "==>  Preparing: select * from user where id = ?\n"
+        "==> Parameters: 1(Long)\n"
+        "<==      Total: 1\n"
+        "after\n"
+    )
+    result, warns = format_mybatis_log(log)
+    assert "before" in result
+    assert "after" in result
+    assert "select * from user where id = 1;" in result
+    assert "Preparing:" not in result
+    assert "Parameters:" not in result
+    assert "Total:" not in result
+    assert warns == []
+
+
+def test_format_append_with_total():
+    log = (
+        "before\n"
+        "==>  Preparing: select * from user where id = ?\n"
+        "==> Parameters: 1(Long)\n"
+        "<==      Total: 1\n"
+        "after\n"
+    )
+    result, warns = format_mybatis_log(log, mode="append")
+    assert "before" in result
+    assert "after" in result
+    assert "Preparing:" in result
+    assert "Parameters:" in result
+    assert "Total:" in result
+    assert "-- Formatted SQL:" in result
+    assert result.index("Total:") < result.index("-- Formatted SQL:")
+    assert "select * from user where id = 1;" in result
+    assert warns == []
+
+
+def test_format_replace_with_total_prefix():
+    log = (
+        "before\n"
+        "==>  Preparing: select * from user where id = ?\n"
+        "==> Parameters: 1(Long)\n"
+        "2026-06-21 DEBUG <==      Total: 1\n"
+        "after\n"
+    )
+    result, warns = format_mybatis_log(log)
+    assert "select * from user where id = 1;" in result
+    assert "Total:" not in result
+    assert warns == []
+
+
+def test_format_no_total_preserves_existing_behavior():
+    log = (
+        "==>  Preparing: select * from user where id = ?\n"
+        "==> Parameters: 1(Long)\n"
+    )
+    result, warns = format_mybatis_log(log)
+    assert "select * from user where id = 1;" in result
+    assert warns == []
+
+
+def test_format_normal_line_between_params_and_next_preparing():
+    log = (
+        "==>  Preparing: select * from user where id = ?\n"
+        "==> Parameters: 1(Long)\n"
+        "some normal log\n"
+        "==>  Preparing: select * from order where id = ?\n"
+        "==> Parameters: 2(Long)\n"
+    )
+    result, warns = format_mybatis_log(log)
+    assert "select * from user where id = 1;" in result
+    assert "select * from order where id = 2;" in result
+    assert "some normal log" in result
+    assert warns == []
+
+
 def test_cli_db_help_includes_mybatis_sql():
     result = CliRunner().invoke(cli, ["db", "--help"])
     assert result.exit_code == 0

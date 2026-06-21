@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 
 _NUMERIC_TYPES = frozenset({
@@ -9,6 +10,20 @@ _DATE_TYPES = frozenset({
     "LocalDate", "LocalDateTime", "LocalTime",
     "OffsetDateTime", "ZonedDateTime",
 })
+
+_TOTAL_RE = re.compile(r"<==\s+Total:")
+
+
+@dataclass(frozen=True)
+class MyBatisBlock:
+    start_idx: int
+    end_idx: int
+    sql: str
+    warnings: list[str]
+
+
+def _is_total_line(line: str) -> bool:
+    return _TOTAL_RE.search(line) is not None
 
 
 @dataclass(frozen=True)
@@ -181,7 +196,7 @@ def format_mybatis_log(
     lines = text.splitlines(keepends=True)
     all_warnings: list[str] = []
 
-    blocks: list[tuple[int, int | None, str | None]] = []
+    blocks: list[MyBatisBlock] = []
 
     i = 0
     while i < len(lines):
@@ -194,14 +209,23 @@ def format_mybatis_log(
         sql = line[pi + len("Preparing:"):].strip()
 
         params_idx: int | None = None
+        total_idx: int | None = None
+
         j = i + 1
         while j < len(lines):
-            if "Parameters:" in lines[j]:
-                params_idx = j
-                break
             if "Preparing:" in lines[j]:
                 break
+
+            if params_idx is None and "Parameters:" in lines[j]:
+                params_idx = j
+
+            if _is_total_line(lines[j]):
+                total_idx = j
+                break
+
             j += 1
+
+        end_idx = total_idx if total_idx is not None else (params_idx if params_idx is not None else i)
 
         block_warnings: list[str] = []
         converted_sql: str | None = None
@@ -227,52 +251,47 @@ def format_mybatis_log(
         if converted_sql is not None and semicolon and not converted_sql.endswith(";"):
             converted_sql += ";"
 
-        blocks.append((i, params_idx, converted_sql, block_warnings))
+        blocks.append(MyBatisBlock(
+            start_idx=i,
+            end_idx=end_idx,
+            sql=converted_sql or "",
+            warnings=block_warnings,
+        ))
 
-        if params_idx is not None:
-            i = params_idx + 1
-        else:
-            i += 1
+        i = end_idx + 1
 
-    for _, _, _, bw in blocks:
-        all_warnings.extend(bw)
+    for b in blocks:
+        all_warnings.extend(b.warnings)
 
     if mode == "sql-only":
         sql_lines: list[str] = []
         first = True
-        for _, _, csql, _ in blocks:
-            if csql is None:
+        for b in blocks:
+            if not b.sql:
                 continue
             if not first and blank_line:
                 sql_lines.append("")
-            sql_lines.append(csql)
+            sql_lines.append(b.sql)
             first = False
         return "\n".join(sql_lines), all_warnings
 
     consumed: set[int] = set()
-    for pi, ppi, _, _ in blocks:
-        start = pi
-        end = ppi if ppi is not None else pi
-        for k in range(start, end + 1):
+    for b in blocks:
+        for k in range(b.start_idx, b.end_idx + 1):
             consumed.add(k)
 
     output_lines: list[str] = []
     i = 0
     while i < len(lines):
         if i in consumed:
-            block = next(b for b in blocks if b[0] == i)
-            pi, ppi, csql, _ = block
+            block = next(b for b in blocks if b.start_idx == i)
             if mode == "replace":
-                output_lines.append(csql + "\n")
-                i = (ppi if ppi is not None else pi) + 1
+                output_lines.append(block.sql + "\n")
             else:
-                output_lines.append(lines[i])
-                if ppi is not None and ppi > pi:
-                    for k in range(pi + 1, ppi):
-                        output_lines.append(lines[k])
-                    output_lines.append(lines[ppi])
-                output_lines.append(f"-- Formatted SQL:\n{csql}\n")
-                i = (ppi if ppi is not None else pi) + 1
+                for k in range(block.start_idx, block.end_idx + 1):
+                    output_lines.append(lines[k])
+                output_lines.append(f"-- Formatted SQL:\n{block.sql}\n")
+            i = block.end_idx + 1
         else:
             output_lines.append(lines[i])
             i += 1
