@@ -66,6 +66,7 @@ my-tools maven simple
 my-tools db batch-delete
 my-tools db mybatis-sql
 my-tools db insert-sql-to-csv
+my-tools db csv-to-insert-sql
 
 my-tools time to-timestamp
 my-tools time from-timestamp
@@ -129,6 +130,59 @@ values
 id,name,age
 1,Alice,18
 2,Bob,20
+```
+
+### CSV 转 INSERT SQL
+
+`my-tools db csv-to-insert-sql` 将 CSV 转换为 MySQL INSERT SQL，支持自定义字段选择、排除、额外字段、字段类型指定和批量模式。
+
+```shell
+# 从文件
+my-tools db csv-to-insert-sql data.csv --table user
+
+# 从 stdin
+cat data.csv | my-tools db csv-to-insert-sql --table user
+
+# 指定数据库和输出文件
+my-tools db csv-to-insert-sql data.csv --database app --table user -o insert.sql
+
+# 指定字段顺序
+my-tools db csv-to-insert-sql data.csv --table user --fields "name,id,age"
+
+# 排除字段
+my-tools db csv-to-insert-sql data.csv --table user --exclude-fields "password"
+
+# 额外字符串字段
+my-tools db csv-to-insert-sql data.csv --table user --extra "created_by=admin"
+
+# 额外 SQL 表达式字段
+my-tools db csv-to-insert-sql data.csv --table user --extra-sql "created_at=now()"
+
+# 字段类型标记（不添加引号）
+my-tools db csv-to-insert-sql data.csv --table user --number-fields id --boolean-fields enabled
+
+# 组合使用 --field-types
+my-tools db csv-to-insert-sql data.csv --table user --field-types "id:number,age:number,enabled:boolean"
+
+# 关闭批量模式
+my-tools db csv-to-insert-sql data.csv --table user --no-batch
+```
+
+输入 CSV：
+
+```csv
+id,name,age,enabled
+1,Alice,18,true
+2,Bob,20,false
+```
+
+输出 SQL：
+
+```sql
+INSERT INTO `user` (`id`, `name`, `age`, `enabled`)
+VALUES
+  (1, 'Alice', 18, TRUE),
+  (2, 'Bob', 20, FALSE);
 ```
 
 ### MyBatis 日志转 SQL

@@ -116,6 +116,7 @@ my-tools maven simple
 my-tools db batch-delete
 my-tools db mybatis-sql
 my-tools db insert-sql-to-csv
+my-tools db csv-to-insert-sql
 
 my-tools time to-timestamp
 my-tools time from-timestamp
