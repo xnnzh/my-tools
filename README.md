@@ -60,6 +60,7 @@ my-tools maven simple
 
 my-tools db batch-delete
 my-tools db mybatis-sql
+my-tools db insert-sql-to-csv
 
 my-tools completion show --shell zsh
 my-tools completion install --shell zsh
@@ -82,6 +83,33 @@ my-tools db batch-delete configs/clean_hsdi.jsonc --env .env --task clean_hsdi_i
 - `.env` 不提交
 - `.env.example` 可复制
 - 日志 `app-{PID}.log` 已忽略
+
+### INSERT SQL 转 CSV
+
+`my-tools db insert-sql-to-csv` 将 `insert into ... values ...` SQL 转换为 CSV，CSV 标题使用 insert 中的列名。
+
+```shell
+my-tools db insert-sql-to-csv insert.sql -o result.csv
+
+cat insert.sql | my-tools db insert-sql-to-csv > result.csv
+```
+
+输入：
+
+```sql
+insert into table1 (id, name, age)
+values
+  (1, 'Alice', 18),
+  (2, 'Bob', 20);
+```
+
+输出：
+
+```csv
+id,name,age
+1,Alice,18
+2,Bob,20
+```
 
 ### MyBatis 日志转 SQL
 

@@ -4,6 +4,7 @@ from pathlib import Path
 import click
 
 from .batch_delete import run_batch_delete
+from .insert_sql_csv import parse_insert_sql, write_csv
 from .mybatis_sql import format_mybatis_log
 
 
@@ -74,3 +75,52 @@ def mybatis_sql(log_files, mode, strict, semicolon, blank_line):
         raise click.ClickException("处理过程中存在错误")
 
     click.echo(result, nl=False)
+
+
+@db.command("insert-sql-to-csv")
+@click.argument(
+    "sql_file", required=False, type=click.Path(exists=True, dir_okay=False)
+)
+@click.option(
+    "-o", "--output", type=click.Path(dir_okay=False), help="CSV 输出文件路径"
+)
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+@click.option(
+    "--delimiter",
+    default=",",
+    show_default=True,
+    help="CSV 分隔符",
+)
+@click.option(
+    "--strict",
+    is_flag=True,
+    help="解析异常时返回错误",
+)
+def insert_sql_to_csv(sql_file, output, encoding, delimiter, strict):
+    """将 INSERT SQL 转换为 CSV，CSV 标题使用 INSERT 中的列名。"""
+    if sql_file:
+        sql = Path(sql_file).read_text(encoding=encoding)
+    else:
+        sql = sys.stdin.read()
+
+    try:
+        data = parse_insert_sql(sql, strict=strict)
+    except ValueError as e:
+        raise click.ClickException(str(e))
+
+    for w in data.warnings:
+        click.echo(f"Warning: {w}", err=True)
+
+    if strict and data.warnings:
+        raise click.ClickException("转换过程中存在警告")
+
+    if output:
+        with open(output, "w", encoding=encoding, newline="") as f:
+            write_csv(data, f, delimiter=delimiter)
+    else:
+        write_csv(data, sys.stdout, delimiter=delimiter)
