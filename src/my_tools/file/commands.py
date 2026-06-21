@@ -8,6 +8,12 @@ import click
 
 from ..core.console import confirm, error, notice, warn
 from .csv_render import DEFAULT_TEMPLATE, convert_csv
+from .json_tools import (
+    compact_json,
+    escape_json_text,
+    pretty_json,
+    unescape_json_text,
+)
 
 _USER_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".config", "my-tools")
 
@@ -133,3 +139,114 @@ def csv_render(csv_file, output, encoding, template, strict):
         Path(output).write_text(content, encoding=encoding)
     else:
         click.echo(content, nl=False)
+
+
+def _read_text(input_file: str | None, encoding: str) -> str:
+    if input_file:
+        return Path(input_file).read_text(encoding=encoding)
+    return sys.stdin.read()
+
+
+def _write_text(content: str, output: str | None, encoding: str) -> None:
+    if not content.endswith("\n"):
+        content += "\n"
+    if output:
+        Path(output).write_text(content, encoding=encoding)
+    else:
+        click.echo(content, nl=False)
+
+
+@file_group.command("json-pretty")
+@click.argument(
+    "input_file", required=False, type=click.Path(exists=True, dir_okay=False)
+)
+@click.option(
+    "-o", "--output", type=click.Path(dir_okay=False), help="输出文件路径"
+)
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+@click.option("--indent", default=2, show_default=True, type=int, help="缩进空格数")
+@click.option("--sort-keys", is_flag=True, help="按 key 排序")
+@click.option("--ascii", "ensure_ascii", is_flag=True, help="转义非 ASCII 字符")
+def json_pretty(input_file, output, encoding, indent, sort_keys, ensure_ascii):
+    """解析合法 JSON 并格式化为多行缩进形式。"""
+    text = _read_text(input_file, encoding)
+    try:
+        result = pretty_json(text, indent=indent, sort_keys=sort_keys, ensure_ascii=ensure_ascii)
+    except ValueError as e:
+        raise click.ClickException(str(e))
+    _write_text(result, output, encoding)
+
+
+@file_group.command("json-compact")
+@click.argument(
+    "input_file", required=False, type=click.Path(exists=True, dir_okay=False)
+)
+@click.option(
+    "-o", "--output", type=click.Path(dir_okay=False), help="输出文件路径"
+)
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+@click.option("--sort-keys", is_flag=True, help="按 key 排序")
+@click.option("--ascii", "ensure_ascii", is_flag=True, help="转义非 ASCII 字符")
+def json_compact(input_file, output, encoding, sort_keys, ensure_ascii):
+    """解析合法 JSON 并压缩为无多余空白形式。"""
+    text = _read_text(input_file, encoding)
+    try:
+        result = compact_json(text, sort_keys=sort_keys, ensure_ascii=ensure_ascii)
+    except ValueError as e:
+        raise click.ClickException(str(e))
+    _write_text(result, output, encoding)
+
+
+@file_group.command("json-escape")
+@click.argument(
+    "input_file", required=False, type=click.Path(exists=True, dir_okay=False)
+)
+@click.option(
+    "-o", "--output", type=click.Path(dir_okay=False), help="输出文件路径"
+)
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+@click.option("--wrap", is_flag=True, help="输出完整 JSON 字符串字面量，包含外层双引号")
+@click.option("--ascii", "ensure_ascii", is_flag=True, help="转义非 ASCII 字符")
+def json_escape(input_file, output, encoding, wrap, ensure_ascii):
+    """把任意文本转成 JSON 字符串转义内容。"""
+    text = _read_text(input_file, encoding)
+    result = escape_json_text(text, wrap=wrap, ensure_ascii=ensure_ascii)
+    _write_text(result, output, encoding)
+
+
+@file_group.command("json-unescape")
+@click.argument(
+    "input_file", required=False, type=click.Path(exists=True, dir_okay=False)
+)
+@click.option(
+    "-o", "--output", type=click.Path(dir_okay=False), help="输出文件路径"
+)
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+def json_unescape(input_file, output, encoding):
+    """把 JSON 字符串转义内容还原为原始文本。"""
+    text = _read_text(input_file, encoding)
+    try:
+        result = unescape_json_text(text)
+    except ValueError as e:
+        raise click.ClickException(str(e))
+    _write_text(result, output, encoding)

@@ -106,9 +106,16 @@ my-tools git copy-change
 my-tools file new-with-template
 my-tools file zip
 my-tools file csv-render
+my-tools file json-pretty
+my-tools file json-compact
+my-tools file json-escape
+my-tools file json-unescape
 
 my-tools maven simple
 
 my-tools db batch-delete
 my-tools db mybatis-sql
-my-tools db insert-sql-to-csv""")
+my-tools db insert-sql-to-csv
+
+my-tools time to-timestamp
+my-tools time from-timestamp""")

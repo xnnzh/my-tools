@@ -56,12 +56,19 @@ my-tools git copy-change
 my-tools file new-with-template
 my-tools file zip
 my-tools file csv-render
+my-tools file json-pretty
+my-tools file json-compact
+my-tools file json-escape
+my-tools file json-unescape
 
 my-tools maven simple
 
 my-tools db batch-delete
 my-tools db mybatis-sql
 my-tools db insert-sql-to-csv
+
+my-tools time to-timestamp
+my-tools time from-timestamp
 
 my-tools completion show --shell zsh
 my-tools completion install --shell zsh
@@ -172,6 +179,67 @@ my-tools file csv-render aliyun.csv \
 ```shell
 my-tools file csv-render aliyun.csv \
   --format "{@timestamp} [{__tag__:_pod_name_}] {level} {message}"
+```
+
+## JSON 处理
+
+### JSON 美化
+
+```shell
+my-tools file json-pretty data.json
+cat data.json | my-tools file json-pretty
+my-tools file json-pretty data.json -o pretty.json
+my-tools file json-pretty data.json --indent 4 --sort-keys
+```
+
+### JSON 压缩
+
+```shell
+my-tools file json-compact data.json
+cat data.json | my-tools file json-compact
+my-tools file json-compact data.json -o compact.json
+```
+
+### JSON 转义
+
+```shell
+printf '%s' '{"name":"张三"}' | my-tools file json-escape
+printf '%s' '{"name":"张三"}' | my-tools file json-escape --wrap
+my-tools file json-escape raw.txt -o escaped.txt
+```
+
+### JSON 去除转义
+
+```shell
+printf '%s' '{\"name\":\"张三\"}' | my-tools file json-unescape
+printf '%s' '"{\"name\":\"张三\"}"' | my-tools file json-unescape
+my-tools file json-unescape escaped.txt -o raw.txt
+```
+
+默认保留中文；如需转义为 `\uXXXX`，使用 `--ascii`。
+
+## 时间工具
+
+### 日期时间转时间戳
+
+```shell
+my-tools time to-timestamp "2026-06-21 12:30:00"
+
+my-tools time to-timestamp "2026-06-21 12:30:00" --unit s
+
+my-tools time to-timestamp "2026-06-21 12:30:00" --timezone UTC
+```
+
+### 时间戳转日期时间
+
+```shell
+my-tools time from-timestamp 1782016200000
+
+my-tools time from-timestamp 1782016200 --unit s
+
+my-tools time from-timestamp 1782016200000 --timezone UTC
+
+my-tools time from-timestamp 1782016200000 --format "%Y-%m-%dT%H:%M:%S%z"
 ```
 
 ## 命令补全
