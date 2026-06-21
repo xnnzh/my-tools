@@ -10,6 +10,7 @@ def test_file_help():
     assert result.exit_code == 0
     assert "new-with-template" in result.output
     assert "zip" in result.output
+    assert "csv-render" in result.output
 
 
 def test_file_new_with_template(tmp_path: Path):

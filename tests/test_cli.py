@@ -17,3 +17,4 @@ def test_list():
     assert result.exit_code == 0
     assert "my-tools git auto" in result.output
     assert "my-tools db batch-delete" in result.output
+    assert "my-tools file csv-render" in result.output

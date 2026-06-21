@@ -55,6 +55,7 @@ my-tools git copy-change
 
 my-tools file new-with-template
 my-tools file zip
+my-tools file csv-render
 
 my-tools maven simple
 
@@ -136,6 +137,41 @@ my-tools db mybatis-sql app.log --strict
 
 # 重定向输出
 my-tools db mybatis-sql app.log > output.sql
+```
+
+## 文件工具
+
+### CSV 模板渲染
+
+`my-tools file csv-render` 将任意 CSV 按模板渲染为文本，模板变量直接使用 CSV 表头字段名。
+
+```shell
+my-tools file csv-render users.csv --format "{name} is {age}"
+
+cat users.csv | my-tools file csv-render --format "{name}: {message}"
+```
+
+阿里云日志 CSV 示例：
+
+```shell
+my-tools file csv-render aliyun.csv \
+  --format "{@timestamp} {level} [{thread_name}] {logger_name} - {message}"
+
+my-tools file csv-render aliyun.csv \
+  | my-tools db mybatis-sql --mode append
+```
+
+默认模板：
+
+```text
+{@timestamp} {level} [{thread_name}] {logger_name} - {message}
+```
+
+模板变量直接使用 CSV 原始表头，例如：
+
+```shell
+my-tools file csv-render aliyun.csv \
+  --format "{@timestamp} [{__tag__:_pod_name_}] {level} {message}"
 ```
 
 ## 命令补全
