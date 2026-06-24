@@ -1,6 +1,7 @@
 import csv
 import io
 import re
+import sys
 from dataclasses import dataclass, field
 
 DEFAULT_TEMPLATE = (
@@ -53,6 +54,7 @@ def convert_csv(
     if not text:
         raise ValueError("CSV 内容为空")
 
+    csv.field_size_limit(sys.maxsize)
     reader = csv.DictReader(io.StringIO(text))
     if not reader.fieldnames:
         raise ValueError("CSV 缺少表头")

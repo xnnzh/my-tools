@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 
 from ..core.console import confirm, error, notice, warn
+from .concat import concatenate_files
 from .csv_render import DEFAULT_TEMPLATE, convert_csv
 from .excel_csv import list_sheet_names, write_excel_sheet_to_csv
 from .json_tools import (
@@ -140,6 +141,56 @@ def csv_render(csv_file, output, encoding, template, strict):
         Path(output).write_text(content, encoding=encoding)
     else:
         click.echo(content, nl=False)
+
+
+@file_group.command("concat")
+@click.argument("paths", nargs=-1, required=True)
+@click.option(
+    "-o", "--output", type=click.Path(dir_okay=False), help="输出文件路径"
+)
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+@click.option(
+    "--separator",
+    default="",
+    show_default=True,
+    help="文件之间的分隔符",
+)
+@click.option("--skip-empty", is_flag=True, help="跳过空文件")
+@click.option(
+    "--skip-hidden/--no-skip-hidden",
+    default=True,
+    help="默认跳过隐藏文件（以 . 开头），--no-skip-hidden 关闭",
+)
+@click.option(
+    "--ext",
+    "extensions",
+    multiple=True,
+    default=None,
+    help="只拼接指定扩展名的文件，可多次指定，如 --ext .txt --ext .md",
+)
+def concat(paths, output, encoding, separator, skip_empty, skip_hidden, extensions):
+    """按顺序拼接多个文件或目录中的文件。"""
+    try:
+        result = concatenate_files(
+            list(paths),
+            encoding=encoding,
+            skip_empty=skip_empty,
+            skip_hidden=skip_hidden,
+            extensions=extensions or None,
+            separator=separator,
+        )
+    except (FileNotFoundError, IsADirectoryError, PermissionError) as e:
+        raise click.ClickException(str(e))
+
+    if output:
+        Path(output).write_text(result, encoding=encoding)
+    else:
+        click.echo(result, nl=False)
 
 
 @file_group.command("excel-to-csv")
