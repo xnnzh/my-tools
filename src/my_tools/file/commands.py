@@ -16,6 +16,7 @@ from .json_tools import (
     pretty_json,
     unescape_json_text,
 )
+from .reverse import reverse_lines
 
 _USER_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".config", "my-tools")
 
@@ -191,6 +192,40 @@ def concat(paths, output, encoding, separator, skip_empty, skip_hidden, extensio
         Path(output).write_text(result, encoding=encoding)
     else:
         click.echo(result, nl=False)
+
+
+@file_group.command("reverse")
+@click.argument(
+    "input_file", required=False, type=click.Path(exists=True, dir_okay=False)
+)
+@click.option(
+    "-o", "--output", type=click.Path(dir_okay=False), help="输出文件路径"
+)
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+@click.option(
+    "--keep-empty/--no-keep-empty",
+    default=True,
+    help="是否保留空行（仅含空白字符的行视为空行）",
+)
+@click.option(
+    "--strip-trailing-newline",
+    is_flag=True,
+    help="输出时移除末尾的换行",
+)
+def reverse(input_file, output, encoding, keep_empty, strip_trailing_newline):
+    """将文件内容按行倒序输出。"""
+    text = _read_text(input_file, encoding)
+    result = reverse_lines(text, keep_empty=keep_empty)
+
+    if output:
+        _write_text(result, output, encoding)
+    else:
+        click.echo(result, nl=not strip_trailing_newline)
 
 
 @file_group.command("excel-to-csv")
