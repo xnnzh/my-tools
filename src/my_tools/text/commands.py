@@ -15,6 +15,7 @@ from .codec_tools import (
     encode_url_text,
     encode_utf8_text,
 )
+from .wrap import wrap_lines
 
 
 def _read_text(text_or_file: str | None, *, from_file: bool, encoding: str) -> str:
@@ -213,3 +214,38 @@ def lower(text_or_file, from_file, output, encoding):
     """将文本转换为小写。"""
     text = _read_text(text_or_file, from_file=from_file, encoding=encoding)
     _write_text(text.lower(), output, encoding)
+
+
+@text_group.command("wrap")
+@click.argument("file", type=click.Path(dir_okay=False, readable=True), required=False)
+@click.option("--prefix", required=True, help="前缀，添加到每一行")
+@click.option("--suffix", default="", help="后缀，添加到每一行")
+@click.option("--last-suffix", default=None, help="最后一行使用的后缀（覆盖 --suffix）")
+@click.option("--keep-empty", is_flag=True, help="保留空行，默认跳过空行")
+@click.option("-o", "--output", type=click.Path(dir_okay=False), help="输出文件路径")
+@click.option(
+    "--encoding",
+    default="utf-8",
+    show_default=True,
+    help="输入/输出文件编码",
+)
+def wrap(file, prefix, suffix, last_suffix, keep_empty, output, encoding):
+    """给每行添加前缀和后缀。"""
+    if file is not None:
+        text = Path(file).read_text(encoding=encoding)
+    else:
+        import sys
+        text = sys.stdin.read()
+    result = wrap_lines(
+        text,
+        prefix,
+        suffix=suffix,
+        last_suffix=last_suffix,
+        keep_empty=keep_empty,
+    )
+    if not result.endswith("\n"):
+        result += "\n"
+    if output:
+        Path(output).write_text(result, encoding=encoding)
+    else:
+        click.echo(result, nl=False)
