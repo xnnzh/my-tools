@@ -17,6 +17,7 @@ from .json_tools import (
     unescape_json_text,
 )
 from .reverse import reverse_lines
+from .split import SplitConfig, parse_size, split_file
 
 _USER_CONFIG_DIR = os.path.join(os.path.expanduser("~"), ".config", "my-tools")
 
@@ -397,3 +398,45 @@ def json_unescape(input_file, output, encoding):
     except ValueError as e:
         raise click.ClickException(str(e))
     _write_text(result, output, encoding)
+
+
+@file_group.command("split")
+@click.argument("input", type=click.Path(exists=True, dir_okay=False, readable=True))
+@click.option("--lines", type=click.IntRange(min=1), help="每个分块行数")
+@click.option("--size", help="每个分块最大字节数（支持后缀 K/KB/MiB/MB 等）")
+@click.option("--output-prefix", required=True, help="输出文件名前缀")
+@click.option("--suffix-length", type=click.IntRange(min=1), default=2, show_default=True, help="后缀长度")
+@click.option("--numbering-start", type=click.IntRange(min=0), default=0, show_default=True, help="起始编号")
+@click.option("--numeric-suffix", is_flag=True, help="使用数字后缀而非字母后缀")
+@click.option("--encoding", default="utf-8", show_default=True, help="输入/输出文件编码")
+def split(input, lines, size, output_prefix, suffix_length, numbering_start, numeric_suffix, encoding):
+    """将大文件拆分为多个小文件。"""
+    if lines is None and size is None:
+        raise click.ClickException("必须指定 --lines 或 --size")
+    if lines is not None and size is not None:
+        raise click.ClickException("--lines 和 --size 不能同时指定")
+
+    max_bytes = None
+    if size is not None:
+        try:
+            max_bytes = parse_size(size)
+        except ValueError as e:
+            raise click.ClickException(str(e))
+
+    config = SplitConfig(
+        input_path=Path(input),
+        output_prefix=output_prefix,
+        lines_per_chunk=lines,
+        max_bytes_per_chunk=max_bytes,
+        suffix_length=suffix_length,
+        numbering_start=numbering_start,
+        numeric_suffix=numeric_suffix,
+        encoding=encoding,
+    )
+
+    try:
+        chunk_count = split_file(config)
+    except ValueError as e:
+        raise click.ClickException(str(e))
+
+    click.echo(f"已生成 {chunk_count} 个分块文件")
